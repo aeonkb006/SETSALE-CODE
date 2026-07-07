@@ -2,16 +2,15 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <!-- V20 新增：viewport-fit=cover 允許讀取 iOS 安全邊界 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SET SALE CODE 系統 (V20)</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-title" content="查貨Code">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <!-- V20 新增：向瀏覽器宣告預先載入 PDF -->
+
+    <!-- V20 新增：預先載入 PDF，達致秒開效果 -->
     <link rel="prefetch" href="manual.pdf">
 
     <style>
@@ -44,8 +43,14 @@
         h2 { margin: 0; font-size: 1.2rem; color: #1c1c1e; }
         
         .pdf-btn { 
-            background: #ff9500; color: white; text-decoration: none; padding: 4px 10px; 
-            border-radius: 12px; font-size: 0.8rem; font-weight: 600; display: inline-block;
+            background: #ff9500; 
+            color: white; 
+            text-decoration: none; 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            font-size: 0.8rem; 
+            font-weight: 600;
+            display: inline-block;
         }
         .pdf-btn:active { background: #e08300; }
 
@@ -91,16 +96,8 @@
         .footer-action { text-align: center; margin-top: 30px; margin-bottom: 30px; }
         .btn-reset { background: var(--red); color: white; border: none; padding: 12px 40px; border-radius: 25px; font-size: 15px; font-weight: 600; }
 
-        /* V20 新增：padding-bottom 自動加上 env(safe-area-inset-bottom) 避開 iOS 橫線 */
-        #custom-keyboard { 
-            position: fixed; bottom: 0; left: 0; width: 100%; 
-            background: #d1d5db; backdrop-filter: blur(10px); 
-            padding: 6px; 
-            padding-bottom: calc(25px + env(safe-area-inset-bottom)); 
-            box-sizing: border-box; z-index: 1000; display: none; 
-            grid-template-columns: repeat(5, 1fr); gap: 6px; 
-        }
-        
+        /* V20：硬性將 padding-bottom 增加 35px (原本係 25px，而家係 60px)，避開底部橫線 */
+        #custom-keyboard { position: fixed; bottom: 0; left: 0; width: 100%; background: #d1d5db; backdrop-filter: blur(10px); padding: 6px; padding-bottom: 60px; box-sizing: border-box; z-index: 1000; display: none; grid-template-columns: repeat(5, 1fr); gap: 6px; }
         .kb-key { background: var(--key-light); color: #000; border: none; border-radius: 5px; height: 52px; font-size: 22px; font-weight: 400; box-shadow: 0 1px 0 #898a8d; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .kb-key:active { background: #e5e5ea; }
         .k-abc { font-weight: 500; } .k-num { font-weight: 400; font-size: 24px; }
@@ -119,6 +116,7 @@
 </head>
 <body>
 
+    <!-- 設定面板 -->
     <div id="settings-panel">
         <h3>⚙️ 資料來源設定 (V20)</h3>
         <p style="font-size:13px; color:#666; margin-bottom:10px;">請貼上 Google Sheet CSV 連結</p>
@@ -128,6 +126,7 @@
         <button onclick="closeSettings()" style="background:none; border:none; color:#999; text-decoration:underline;">取消</button>
     </div>
 
+    <!-- 查詢畫面 -->
     <div id="search-screen">
         <div class="status-bar">
             <span id="last-update">等待更新...</span>
@@ -159,6 +158,7 @@
         </div>
     </div>
 
+    <!-- 鍵盤 -->
     <div id="custom-keyboard">
         <button class="kb-key k-abc" onmousedown="tap('A')" ontouchstart="tap('A')">A</button>
         <button class="kb-key k-num" onmousedown="tap('1')" ontouchstart="tap('1')">1</button>
@@ -179,6 +179,7 @@
         <button class="kb-key k-go" onmousedown="tap('GO')" ontouchstart="tap('GO')">GO</button>
     </div>
 
+    <!-- Modal -->
     <div id="modal" class="modal">
         <div class="modal-box">
             <b id="m-code" style="font-size:1.6em; color:var(--blue); display:block; margin-bottom:15px;"></b>
@@ -208,11 +209,6 @@
                 if(!csvUrl) openSettings();
             }
             document.getElementById('custom-keyboard').style.display = 'grid';
-
-            // V20 新增：背景靜默 Fetch PDF (延遲 1 秒執行，不影響主程式載入)
-            setTimeout(() => {
-                fetch('manual.pdf').catch(() => console.log("PDF 預載略過"));
-            }, 1000);
         };
 
         function syncData() {
